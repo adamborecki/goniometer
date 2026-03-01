@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Goniometer Phase Scope</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="backdrop" aria-hidden="true"></div>
+    <main class="app-shell">
+      <header class="hero">
+        <p class="eyebrow">Stereo Imaging Lab</p>
+        <h1>Goniometer / Phase Scope / Vector Scope</h1>
+        <p class="subhead">
+          Real-time stereo field analysis with microphone input or an onboard
+          signal generator.
+        </p>
+        <div class="status-row">
+          <span id="runStatus" class="status-badge idle">Idle</span>
+          <span id="inputStatus" class="status-chip">Input: none</span>
+          <span id="sampleStatus" class="status-chip">Sample rate: --</span>
+        </div>
+      </header>
+
+      <section class="scope-grid">
+        <article class="panel">
+          <div class="panel-header">
+            <h2>Phase Scope</h2>
+            <p>Left channel vs right channel</p>
+          </div>
+          <canvas id="phaseCanvas" aria-label="Phase scope display"></canvas>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <h2>Vector Scope</h2>
+            <p>Mid and side projection</p>
+          </div>
+          <canvas id="vectorCanvas" aria-label="Vector scope display"></canvas>
+        </article>
+      </section>
+
+      <section class="panel meter-panel">
+        <div class="panel-header">
+          <h2>Correlation Meter</h2>
+          <p>-1 = out of phase, +1 = mono compatible</p>
+        </div>
+        <div class="meter-track" role="img" aria-label="Stereo correlation meter">
+          <div id="corrNeedle" class="meter-needle"></div>
+        </div>
+        <div class="meter-labels">
+          <span>-1</span>
+          <span>0</span>
+          <span>+1</span>
+        </div>
+        <div class="meter-readouts">
+          <span id="corrValue">Correlation: --</span>
+          <span id="rmsValue">RMS: L -- dB / R -- dB</span>
+        </div>
+      </section>
+
+      <section class="panel controls">
+        <div class="panel-header">
+          <h2>Controls</h2>
+          <p>Live configuration for scope behavior and source setup</p>
+        </div>
+
+        <div class="controls-grid">
+          <div class="control-group">
+            <label for="inputMode">Input mode</label>
+            <select id="inputMode">
+              <option value="mic">Microphone</option>
+              <option value="demo">Built-in test signal</option>
+            </select>
+          </div>
+
+          <div class="control-group action-group">
+            <button id="startButton" type="button">Start</button>
+            <button id="stopButton" type="button" disabled>Stop</button>
+          </div>
+
+          <div class="control-group">
+            <label for="gainRange">Analysis gain</label>
+            <input
+              id="gainRange"
+              type="range"
+              min="0.5"
+              max="3"
+              step="0.05"
+              value="1.2"
+            />
+            <output id="gainOut" for="gainRange">1.20x</output>
+          </div>
+
+          <div class="control-group">
+            <label for="persistenceRange">Persistence</label>
+            <input
+              id="persistenceRange"
+              type="range"
+              min="0.75"
+              max="0.99"
+              step="0.01"
+              value="0.9"
+            />
+            <output id="persistenceOut" for="persistenceRange">0.90</output>
+          </div>
+
+          <div class="control-group">
+            <label for="zoomRange">Zoom</label>
+            <input
+              id="zoomRange"
+              type="range"
+              min="0.35"
+              max="0.95"
+              step="0.01"
+              value="0.72"
+            />
+            <output id="zoomOut" for="zoomRange">0.72</output>
+          </div>
+
+          <div class="control-group">
+            <label for="pointSizeRange">Point size</label>
+            <input
+              id="pointSizeRange"
+              type="range"
+              min="1"
+              max="4"
+              step="0.25"
+              value="2"
+            />
+            <output id="pointSizeOut" for="pointSizeRange">2.00</output>
+          </div>
+
+          <div class="control-group">
+            <label for="intensityRange">Intensity</label>
+            <input
+              id="intensityRange"
+              type="range"
+              min="0.2"
+              max="1"
+              step="0.05"
+              value="0.85"
+            />
+            <output id="intensityOut" for="intensityRange">0.85</output>
+          </div>
+        </div>
+
+        <fieldset id="demoControls" class="demo-controls">
+          <legend>Built-in test signal</legend>
+          <div class="controls-grid">
+            <div class="control-group">
+              <label for="waveformSelect">Waveform</label>
+              <select id="waveformSelect">
+                <option value="sine">Sine</option>
+                <option value="triangle">Triangle</option>
+                <option value="sawtooth">Sawtooth</option>
+                <option value="square">Square</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="freqRange">Frequency</label>
+              <input
+                id="freqRange"
+                type="range"
+                min="40"
+                max="1000"
+                step="1"
+                value="220"
+              />
+              <output id="freqOut" for="freqRange">220 Hz</output>
+            </div>
+
+            <div class="control-group">
+              <label for="phaseRange">L/R phase offset</label>
+              <input
+                id="phaseRange"
+                type="range"
+                min="-180"
+                max="180"
+                step="1"
+                value="90"
+              />
+              <output id="phaseOut" for="phaseRange">90 deg</output>
+            </div>
+
+            <div class="control-group">
+              <label for="widthRange">Stereo width</label>
+              <input
+                id="widthRange"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value="1"
+              />
+              <output id="widthOut" for="widthRange">1.00</output>
+            </div>
+
+            <div class="control-group">
+              <label for="demoLevelRange">Demo level</label>
+              <input
+                id="demoLevelRange"
+                type="range"
+                min="0"
+                max="0.8"
+                step="0.01"
+                value="0.2"
+              />
+              <output id="demoLevelOut" for="demoLevelRange">0.20</output>
+            </div>
+          </div>
+        </fieldset>
+
+        <p class="note">
+          Microphone mode requests browser audio permissions with processing
+          features disabled for cleaner stereo analysis.
+        </p>
+      </section>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
